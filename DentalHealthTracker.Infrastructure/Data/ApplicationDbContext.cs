@@ -29,12 +29,19 @@ namespace DentalHealthTracker.Infrastructure.Data
                 .HasForeignKey(g => g.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // One-to-Many: User -> HealthRecords
+            // One-to-Many: User -> HealthRecords (ON DELETE NO ACTION)
             modelBuilder.Entity<HealthRecord>()
                 .HasOne(hr => hr.User)
                 .WithMany(u => u.HealthRecords)
                 .HasForeignKey(hr => hr.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction); // NoAction ile cycle hatasını önledik
+
+            // One-to-Many: Goal -> HealthRecords (ON DELETE NO ACTION)
+            modelBuilder.Entity<HealthRecord>()
+                .HasOne(hr => hr.Goal)
+                .WithMany(g => g.HealthRecords)
+                .HasForeignKey(hr => hr.GoalId)
+                .OnDelete(DeleteBehavior.NoAction); // NoAction ile cycle hatasını önledik
 
             // One-to-Many: User -> Notes
             modelBuilder.Entity<Note>()

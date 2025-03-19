@@ -1,0 +1,12 @@
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\bin\Debug\net8.0\DentalHealthTracker.Core.deps.json
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\bin\Debug\net8.0\DentalHealthTracker.Core.dll
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\bin\Debug\net8.0\DentalHealthTracker.Core.pdb
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\obj\Debug\net8.0\DentalHealthTracker.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\obj\Debug\net8.0\DentalHealthTracker.Core.AssemblyInfoInputs.cache
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\obj\Debug\net8.0\DentalHealthTracker.Core.AssemblyInfo.cs
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\obj\Debug\net8.0\DentalHealthTracker.Core.csproj.CoreCompileInputs.cache
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\obj\Debug\net8.0\DentalHealthTracker.Core.sourcelink.json
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\obj\Debug\net8.0\DentalHealthTracker.Core.dll
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\obj\Debug\net8.0\refint\DentalHealthTracker.Core.dll
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\obj\Debug\net8.0\DentalHealthTracker.Core.pdb
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.Core\obj\Debug\net8.0\ref\DentalHealthTracker.Core.dll
