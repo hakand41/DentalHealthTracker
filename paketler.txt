@@ -1,0 +1,5 @@
+dotnet add DentalHealthTracker.Infrastructure package Microsoft.EntityFrameworkCore
+dotnet add DentalHealthTracker.Infrastructure package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add DentalHealthTracker.Infrastructure package Microsoft.EntityFrameworkCore.Design
+dotnet add DentalHealthTracker.API package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add DentalHealthTracker.API package Microsoft.EntityFrameworkCore.Tools
