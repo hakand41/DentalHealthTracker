@@ -1,0 +1,35 @@
+// Proje Katmanları
+// 1. DentalHealthTracker.Core (Çekirdek Katman)
+// - Entities
+// - Interfaces
+// - DTOs
+// - Enums
+// - Exceptions
+
+// 2. DentalHealthTracker.Infrastructure (Altyapı Katmanı)
+// - Data
+// - Repositories
+// - Services
+// - Helpers
+
+// 3. DentalHealthTracker.API (API Katmanı)
+// - Controllers
+// - Middleware
+// - Extensions
+// - Filters
+
+// Çözüm Oluşturma Komutları
+// dotnet new sln -n DentalHealthTracker
+// dotnet new classlib -n DentalHealthTracker.Core
+// dotnet new classlib -n DentalHealthTracker.Infrastructure
+// dotnet new webapi -n DentalHealthTracker.API
+
+// Çözüme Projeleri Ekleme
+// dotnet sln add DentalHealthTracker.Core
+// dotnet sln add DentalHealthTracker.Infrastructure
+// dotnet sln add DentalHealthTracker.API
+
+// Proje Referansları
+// dotnet add DentalHealthTracker.Infrastructure reference DentalHealthTracker.Core
+// dotnet add DentalHealthTracker.API reference DentalHealthTracker.Core
+// dotnet add DentalHealthTracker.API reference DentalHealthTracker.Infrastructure

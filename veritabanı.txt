@@ -1,0 +1,55 @@
+erDiagram
+    Users ||--o{ HealthRecords : "kaydeder"
+    Users ||--o{ Goals : "oluşturur"
+    Users ||--o{ Notes : "ekler"
+    Goals ||--o{ HealthRecords : "takip_edilir"
+    HealthSuggestions ||--o{ Users : "gösterilir"
+
+    Users {
+        int id PK
+        string email UK "Email adresi"
+        string passwordHash "Şifrelenmiş parola"
+        string passwordSalt "Şifreleme tuzu"
+        string fullName "Ad soyad"
+        date birthDate "Doğum tarihi"
+        datetime createdAt "Kayıt tarihi"
+        datetime updatedAt "Güncelleme tarihi"
+    }
+
+    Goals {
+        int id PK
+        int userId FK "Kullanıcı ID"
+        string title "Hedef başlığı"
+        string description "Hedef açıklaması"
+        string period "Periyot bilgisi"
+        string importance "Önem derecesi (düşük, orta, yüksek)"
+        boolean isActive "Aktif/Pasif durumu"
+        datetime createdAt "Oluşturma tarihi"
+        datetime updatedAt "Güncelleme tarihi"
+    }
+
+    HealthRecords {
+        int id PK
+        int userId FK "Kullanıcı ID"
+        int goalId FK "Hedef ID"
+        date recordDate "Kayıt tarihi"
+        time recordTime "Kayıt saati"
+        int duration "Süre (dakika)"
+        boolean isCompleted "Uygulandı bilgisi"
+        datetime createdAt "Oluşturma tarihi"
+    }
+
+    Notes {
+        int id PK
+        int userId FK "Kullanıcı ID"
+        string description "Not açıklaması"
+        string imagePath "Görsel dosya yolu"
+        datetime createdAt "Oluşturma tarihi"
+    }
+
+    HealthSuggestions {
+        int id PK
+        string content "Öneri içeriği"
+        boolean isActive "Aktif/Pasif durumu"
+        datetime createdAt "Oluşturma tarihi"
+    }
