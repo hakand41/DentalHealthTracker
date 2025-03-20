@@ -172,3 +172,4 @@ C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\obj\Debug\net8.
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\obj\Debug\net8.0\DentalHealthTracker.API.pdb
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\obj\Debug\net8.0\DentalHealthTracker.API.genruntimeconfig.cache
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\obj\Debug\net8.0\ref\DentalHealthTracker.API.dll
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
