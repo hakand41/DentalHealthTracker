@@ -4,6 +4,7 @@ using DentalHealthTracker.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DentalHealthTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250320113727_MakeGoalIdNullable")]
+    partial class MakeGoalIdNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,7 +82,7 @@ namespace DentalHealthTracker.Infrastructure.Migrations
                     b.Property<int>("FlossingCount")
                         .HasColumnType("int");
 
-                    b.Property<int>("GoalId")
+                    b.Property<int?>("GoalId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsCompleted")
@@ -218,8 +221,7 @@ namespace DentalHealthTracker.Infrastructure.Migrations
                     b.HasOne("DentalHealthTracker.Core.Entities.Goal", "Goal")
                         .WithMany("HealthRecords")
                         .HasForeignKey("GoalId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("DentalHealthTracker.Core.Entities.User", "User")
                         .WithMany("HealthRecords")

@@ -38,6 +38,8 @@ builder.Services.AddScoped<JwtTokenGenerator>();
 // **Service Katmanını Enjekte Etme**
 builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGoalService, GoalService>();
+builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
 
 // **Veritabanı Bağlantısı**
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -46,6 +48,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // **Repository Katmanını Enjekte Etme**
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGoalRepository, GoalRepository>();
+builder.Services.AddScoped<IHealthRecordRepository, HealthRecordRepository>();
 
 // **API ve Swagger Ayarları**
 builder.Services.AddControllers();
