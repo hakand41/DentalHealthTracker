@@ -49,6 +49,19 @@ namespace DentalHealthTracker.Infrastructure.Data
                 .WithMany(u => u.Notes)
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HealthSuggestion>().HasData(
+                new HealthSuggestion { Id = 1, Content = "Dişlerinizi günde en az 2 kez fırçalayın.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) },
+                new HealthSuggestion { Id = 2, Content = "Şekerli yiyeceklerden kaçının.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) },
+                new HealthSuggestion { Id = 3, Content = "Diş ipi kullanmayı ihmal etmeyin.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) },
+                new HealthSuggestion { Id = 4, Content = "Diş hekiminize düzenli olarak görünün.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) },
+                new HealthSuggestion { Id = 5, Content = "Sigara ve alkol tüketimini azaltın.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) },
+                new HealthSuggestion { Id = 6, Content = "Ağız çalkalama suyu kullanın.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) },
+                new HealthSuggestion { Id = 7, Content = "Sağlıklı beslenme diş sağlığınızı korur.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) },
+                new HealthSuggestion { Id = 8, Content = "Aşırı sert diş fırçalamaktan kaçının.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) },
+                new HealthSuggestion { Id = 9, Content = "Dişlerinizi yatmadan önce mutlaka fırçalayın.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) },
+                new HealthSuggestion { Id = 10, Content = "Asitli içecekleri sınırlayın.", IsActive = true, CreatedAt = new DateTime(2024, 03, 20, 12, 00, 00) }
+            );
         }
     }
 }

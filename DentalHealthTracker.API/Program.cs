@@ -40,6 +40,8 @@ builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
+builder.Services.AddScoped<INoteService, NoteService>();
+builder.Services.AddScoped<IHealthSuggestionService, HealthSuggestionService>();
 
 // **Veritabanı Bağlantısı**
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -50,6 +52,8 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 builder.Services.AddScoped<IHealthRecordRepository, HealthRecordRepository>();
+builder.Services.AddScoped<INoteRepository, NoteRepository>();
+builder.Services.AddScoped<IHealthSuggestionRepository, HealthSuggestionRepository>();
 
 // **API ve Swagger Ayarları**
 builder.Services.AddControllers();

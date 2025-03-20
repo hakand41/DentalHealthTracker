@@ -4,6 +4,7 @@ using DentalHealthTracker.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DentalHealthTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250320122421_SeedHealthSuggestions")]
+    partial class SeedHealthSuggestions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,70 +139,70 @@ namespace DentalHealthTracker.Infrastructure.Migrations
                         {
                             Id = 1,
                             Content = "Dişlerinizi günde en az 2 kez fırçalayın.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9319),
                             IsActive = true
                         },
                         new
                         {
                             Id = 2,
                             Content = "Şekerli yiyeceklerden kaçının.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9911),
                             IsActive = true
                         },
                         new
                         {
                             Id = 3,
                             Content = "Diş ipi kullanmayı ihmal etmeyin.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9912),
                             IsActive = true
                         },
                         new
                         {
                             Id = 4,
                             Content = "Diş hekiminize düzenli olarak görünün.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9913),
                             IsActive = true
                         },
                         new
                         {
                             Id = 5,
                             Content = "Sigara ve alkol tüketimini azaltın.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9914),
                             IsActive = true
                         },
                         new
                         {
                             Id = 6,
                             Content = "Ağız çalkalama suyu kullanın.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9914),
                             IsActive = true
                         },
                         new
                         {
                             Id = 7,
                             Content = "Sağlıklı beslenme diş sağlığınızı korur.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9915),
                             IsActive = true
                         },
                         new
                         {
                             Id = 8,
                             Content = "Aşırı sert diş fırçalamaktan kaçının.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9916),
                             IsActive = true
                         },
                         new
                         {
                             Id = 9,
                             Content = "Dişlerinizi yatmadan önce mutlaka fırçalayın.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9916),
                             IsActive = true
                         },
                         new
                         {
                             Id = 10,
                             Content = "Asitli içecekleri sınırlayın.",
-                            CreatedAt = new DateTime(2024, 3, 20, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 3, 20, 12, 24, 20, 900, DateTimeKind.Utc).AddTicks(9917),
                             IsActive = true
                         });
                 });
