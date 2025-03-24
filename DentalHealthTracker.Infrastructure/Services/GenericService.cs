@@ -12,20 +12,11 @@ namespace DentalHealthTracker.Infrastructure.Services
             _repository = repository;
         }
 
-        public async Task<T?> GetByIdAsync(int id)
-        {
-            return await _repository.GetByIdAsync(id);
-        }
+        public async Task<T?> GetByIdAsync(int id) => await _repository.GetByIdAsync(id);
 
-        public async Task<IEnumerable<T>> GetAllAsync()
-        {
-            return await _repository.GetAllAsync();
-        }
+        public async Task<IEnumerable<T>> GetAllAsync() => await _repository.GetAllAsync();
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
-        {
-            return await _repository.FindAsync(predicate);
-        }
+        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate) => await _repository.FindAsync(predicate);
 
         public async Task<T> AddAsync(T entity)
         {
@@ -36,19 +27,15 @@ namespace DentalHealthTracker.Infrastructure.Services
 
         public async Task<T> UpdateAsync(T entity)
         {
-            _repository.Update(entity);
+            await _repository.UpdateAsync(entity);
             await _repository.SaveChangesAsync();
             return entity;
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(T entity)
         {
-            var entity = await _repository.GetByIdAsync(id);
-            if (entity == null) return false;
-
-            _repository.Delete(entity);
-            await _repository.SaveChangesAsync();
-            return true;
+            await _repository.DeleteAsync(entity);
+            return await _repository.SaveChangesAsync() > 0;
         }
     }
 }

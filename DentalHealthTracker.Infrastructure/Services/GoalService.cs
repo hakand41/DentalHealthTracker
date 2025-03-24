@@ -16,5 +16,11 @@ namespace DentalHealthTracker.Infrastructure.Services
         {
             return await _goalRepository.GetUserGoalsAsync(userId);
         }
+
+        public async Task<List<Goal>> GetGoalsByUser(int userId)
+        {
+            return await _goalRepository.GetGoalsByUser(userId);
+        }
+
     }
 }

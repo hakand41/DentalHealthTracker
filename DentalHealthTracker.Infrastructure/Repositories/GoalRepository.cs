@@ -15,5 +15,15 @@ namespace DentalHealthTracker.Infrastructure.Repositories
                 .OrderByDescending(g => g.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<List<Goal>> GetGoalsByUser(int userId)
+        {
+            return await _context.Goals
+                .Where(g => g.UserId == userId)
+                .OrderByDescending(g => g.CreatedAt)
+                .ToListAsync();
+        }
+
+        
     }
 }

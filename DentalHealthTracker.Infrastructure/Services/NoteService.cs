@@ -16,5 +16,10 @@ namespace DentalHealthTracker.Infrastructure.Services
         {
             return await _noteRepository.GetUserNotesAsync(userId);
         }
+
+        public async Task<List<Note>> GetNotesByUserAndDate(int userId, DateTime fromDate)
+        {
+            return await _noteRepository.GetNotesByUserAndDate(userId, fromDate);
+        }
     }
 }

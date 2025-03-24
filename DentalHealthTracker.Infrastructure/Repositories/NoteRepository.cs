@@ -15,5 +15,13 @@ namespace DentalHealthTracker.Infrastructure.Repositories
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<List<Note>> GetNotesByUserAndDate(int userId, DateTime fromDate)
+        {
+            return await _context.Notes
+                .Where(n => n.UserId == userId && n.CreatedAt >= fromDate)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+        }
     }
 }
