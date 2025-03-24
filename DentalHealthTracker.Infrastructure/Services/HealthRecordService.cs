@@ -16,5 +16,11 @@ namespace DentalHealthTracker.Infrastructure.Services
         {
             return await _healthRecordRepository.GetUserHealthRecordsAsync(userId);
         }
+
+        public async Task<List<HealthRecord>> GetLast7DaysRecords(int userId)
+        {
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+            return await _healthRecordRepository.GetRecordsByUserAndDate(userId, sevenDaysAgo);
+        }
     }
 }
