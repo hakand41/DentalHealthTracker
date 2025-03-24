@@ -1,4 +1,4 @@
 {
  "email": "degerhakan41@gmail.com",
- "passwordHash": "Hakan4189."
+ "passwordHash": "Hakan41."
 }
