@@ -1,3 +1,4 @@
+using DentalHealthTracker.Core.DTOs;
 using DentalHealthTracker.Core.Entities;
 using DentalHealthTracker.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -36,5 +37,34 @@ namespace DentalHealthTracker.API.Controllers
                 user.BirthDate
             });
         }
+
+        [Authorize]
+        [HttpPut("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] User updatedUser)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+            var user = await _userService.UpdateUserAsync(userId, updatedUser.FullName, updatedUser.BirthDate);
+            if (user == null) return BadRequest("Güncelleme başarısız.");
+
+            return Ok(user);
+        }
+
+        [Authorize]
+        [HttpPut("update-password")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest model)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+            var user = await _userService.UpdateUserPasswordAsync(userId, model.OldPassword, model.NewPassword);
+            if (user == null) return BadRequest("Şifre güncelleme başarısız.");
+
+            return Ok("Şifre başarıyla değiştirildi.");
+        }
+
     }
 }

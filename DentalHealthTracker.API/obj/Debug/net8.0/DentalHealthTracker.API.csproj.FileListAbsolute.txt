@@ -8,6 +8,7 @@ C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.0\Azure.Core.dll
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.0\Azure.Identity.dll
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.0\Humanizer.dll
+C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.0\Microsoft.Build.Locator.dll
@@ -172,4 +173,3 @@ C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\obj\Debug\net8.
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\obj\Debug\net8.0\DentalHealthTracker.API.pdb
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\obj\Debug\net8.0\DentalHealthTracker.API.genruntimeconfig.cache
 C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\obj\Debug\net8.0\ref\DentalHealthTracker.API.dll
-C:\Users\hakan\OneDrive\Masaüstü\proje\DentalHealthTracker.API\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
