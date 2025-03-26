@@ -75,13 +75,34 @@ namespace DentalHealthTracker.API.Controllers
 
         // ✅ 4️⃣ Kullanıcı Hedef Silebilir
         [HttpDelete("goals/{goalId}")]
-        public async Task<IActionResult> DeleteGoal(int goalId)
+        public async Task<IActionResult> DeleteGoal(int goalId, [FromQuery] bool forceDelete = false)
         {
-            var goal = await _goalService.GetByIdAsync(goalId);
-            if (goal == null) return NotFound("Hedef bulunamadı.");
-            await _goalService.DeleteAsync(goal);
+            var existingGoal = await _goalService.GetByIdAsync(goalId);
+            if (existingGoal == null)
+            {
+                return NotFound("Hedef bulunamadı.");
+            }
+
+            // Hedefe bağlı sağlık kayıtları olup olmadığını kontrol et
+            bool hasHealthRecords = await _healthRecordService.HasHealthRecordsAsync(goalId);
+
+            if (hasHealthRecords && !forceDelete)
+            {
+                return BadRequest("Bu hedef için sağlık kayıtları bulundu, silmek istediğinize emin misiniz?");
+            }
+
+            if (hasHealthRecords && forceDelete)
+            {
+                // Önce sağlık kayıtlarını sil
+                await _healthRecordService.DeleteByGoalIdAsync(goalId);
+            }
+
+            // Hedefi sil
+            await _goalService.DeleteAsync(existingGoal);
             return Ok("Hedef başarıyla silindi.");
         }
+
+
 
 
     }

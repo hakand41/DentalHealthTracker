@@ -22,5 +22,11 @@ namespace DentalHealthTracker.Infrastructure.Services
             return await _goalRepository.GetGoalsByUser(userId);
         }
 
+        public async Task<bool> HasHealthRecordsAsync(int goalId)
+        {
+            return await _goalRepository.HasHealthRecordsAsync(goalId);
+        }
+
+
     }
 }

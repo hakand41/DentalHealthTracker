@@ -6,5 +6,7 @@ namespace DentalHealthTracker.Infrastructure.Services
     {
         Task<IEnumerable<HealthRecord>> GetUserHealthRecordsAsync(int userId);
         Task<List<HealthRecord>> GetLast7DaysRecords(int userId);
+        Task DeleteByGoalIdAsync(int goalId);
+        Task<bool> HasHealthRecordsAsync(int goalId);
     }
 }

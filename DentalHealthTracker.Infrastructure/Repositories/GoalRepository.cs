@@ -24,6 +24,10 @@ namespace DentalHealthTracker.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<bool> HasHealthRecordsAsync(int goalId)
+        {
+            return await _context.HealthRecords.AnyAsync(hr => hr.GoalId == goalId);
+        }
         
     }
 }

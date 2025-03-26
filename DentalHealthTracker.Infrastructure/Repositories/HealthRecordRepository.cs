@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using DentalHealthTracker.Core.Entities;
 using DentalHealthTracker.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -22,5 +23,15 @@ namespace DentalHealthTracker.Infrastructure.Repositories
                 .Where(hr => hr.UserId == userId && hr.RecordDate >= fromDate)
                 .ToListAsync();
         }
+
+        public async Task<bool> AnyAsync(Expression<Func<HealthRecord, bool>> predicate)
+        {
+            return await _context.HealthRecords.AnyAsync(predicate);
+        }
+
+        //public async Task<IEnumerable<HealthRecord>> FindAsync(Expression<Func<HealthRecord, bool>> predicate)
+        //{
+        //    return await _context.HealthRecords.Where(predicate).ToListAsync();
+        //}
     }
 }

@@ -22,5 +22,20 @@ namespace DentalHealthTracker.Infrastructure.Services
             var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
             return await _healthRecordRepository.GetRecordsByUserAndDate(userId, sevenDaysAgo);
         }
+
+        public async Task DeleteByGoalIdAsync(int goalId)
+        {
+            var healthRecords = await _healthRecordRepository.FindAsync(hr => hr.GoalId == goalId);
+            foreach (var record in healthRecords)
+            {
+                await _healthRecordRepository.DeleteAsync(record);
+            }
+            await _healthRecordRepository.SaveChangesAsync();
+        }
+
+        public async Task<bool> HasHealthRecordsAsync(int goalId)
+        {
+            return await _healthRecordRepository.AnyAsync(hr => hr.GoalId == goalId);
+        }
     }
 }
