@@ -5,6 +5,9 @@ using DentalHealthTracker.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Authorization;   
+
 
 namespace DentalHealthTracker.API.Controllers
 {
@@ -15,6 +18,7 @@ namespace DentalHealthTracker.API.Controllers
         private readonly IUserService _userService;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
         private readonly MailService _mailService;
+        private static ConcurrentDictionary<string, DateTime> _blacklistedTokens = new();
 
         public AuthController(IUserService userService, JwtTokenGenerator jwtTokenGenerator, MailService mailService)
         {
@@ -123,6 +127,23 @@ namespace DentalHealthTracker.API.Controllers
 
             await _userService.UpdateAsync(user);
             return Ok("Şifreniz başarıyla güncellendi.");
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _blacklistedTokens.TryAdd(token, DateTime.UtcNow.AddHours(1)); // Token'ı 1 saat geçersiz yap
+            }
+            return Ok("Çıkış işlemi başarılı.");
+        }
+
+        public static bool IsTokenBlacklisted(string token)
+        {
+            return _blacklistedTokens.ContainsKey(token);
         }
     }
 }

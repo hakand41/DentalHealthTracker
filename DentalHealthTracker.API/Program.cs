@@ -64,6 +64,9 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Çıkış yapmış token'ları kontrol eden middleware ekleniyor
+app.UseMiddleware<JwtBlacklistMiddleware>();
+
 // **Middleware'ler**
 app.UseSwagger();
 app.UseSwaggerUI();
