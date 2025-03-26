@@ -3,6 +3,8 @@ using DentalHealthTracker.Core.Entities;
 using DentalHealthTracker.Infrastructure.Helpers;
 using DentalHealthTracker.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace DentalHealthTracker.API.Controllers
 {
@@ -12,11 +14,13 @@ namespace DentalHealthTracker.API.Controllers
     {
         private readonly IUserService _userService;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
+        private readonly MailService _mailService;
 
-        public AuthController(IUserService userService, JwtTokenGenerator jwtTokenGenerator)
+        public AuthController(IUserService userService, JwtTokenGenerator jwtTokenGenerator, MailService mailService)
         {
             _userService = userService;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _mailService = mailService;
         }
 
         [HttpPost("register")]
@@ -40,7 +44,7 @@ namespace DentalHealthTracker.API.Controllers
                         <p>Dental Health Tracker'a kayıt olduğunuz için teşekkür ederiz!</p>
                         <p>Sağlıklı bir ağız bakımı için uygulamamızı kullanabilirsiniz.</p>
                         <p><strong>Email:</strong> {user.Email}</p>
-                        <p><a href='https://dentalhealthtracker.com'>Giriş Yap</a></p>
+                        <p><a href='http://localhost:5288'>Giriş Yap</a></p>
                         <br>
                         <p>Dental Health Tracker Ekibi</p>
                     </body>
@@ -76,7 +80,43 @@ namespace DentalHealthTracker.API.Controllers
             var user = await _userService.GetByEmailAsync(request.Email);
             if (user == null) return NotFound("Bu e-posta adresine sahip bir kullanıcı bulunamadı.");
 
-            // Yeni şifre hash'leniyor
+            // **Şifre sıfırlama için geçici token oluşturuyoruz**
+            string resetToken = _jwtTokenGenerator.GenerateToken(user.Id, user.Email);
+
+            // **Kullanıcıya şifre sıfırlama maili gönderiyoruz**
+            string emailSubject = "Parola Sıfırlama Talebi";
+            string emailBody = $@"
+                <html>
+                    <body>
+                        <h2>Merhaba {user.FullName},</h2>
+                        <p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
+                        <p>
+                            <a href='http://localhost:5288/reset-password?token={resetToken}'>
+                                Şifreyi Sıfırla
+                            </a>
+                        </p>
+                        <br>
+                        <p>Bu bağlantı yalnızca 30 dakika boyunca geçerlidir.</p>
+                        <p>Dental Health Tracker Ekibi</p>
+                    </body>
+                </html>";
+
+            await _mailService.SendEmailAsync(user.Email, emailSubject, emailBody);
+
+            return Ok("Parola sıfırlama talimatları e-posta adresinize gönderildi.");
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var user = await _userService.GetByEmailAsync(request.Email);
+            if (user == null) return NotFound("Bu e-posta adresine sahip bir kullanıcı bulunamadı.");
+
+            // **Token doğrulama (JWT içinde userId ve email var)**
+            bool isTokenValid = _jwtTokenGenerator.ValidateToken(request.Token, out int userId, out string email);
+            if (!isTokenValid || userId != user.Id) return Unauthorized("Geçersiz veya süresi dolmuş token.");
+
+            // **Yeni şifreyi hash'liyoruz**
             PasswordHasher.CreatePasswordHash(request.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
             user.PasswordHash = Convert.ToBase64String(passwordHash);
             user.PasswordSalt = Convert.ToBase64String(passwordSalt);
@@ -84,6 +124,5 @@ namespace DentalHealthTracker.API.Controllers
             await _userService.UpdateAsync(user);
             return Ok("Şifreniz başarıyla güncellendi.");
         }
-
     }
 }

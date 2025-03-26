@@ -34,5 +34,41 @@ namespace DentalHealthTracker.Infrastructure.Helpers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public bool ValidateToken(string token, out int userId, out string email)
+        {
+            userId = 0;
+            email = string.Empty;
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_config["JwtSettings:Key"]!);
+
+            try
+            {
+                var validationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = _config["JwtSettings:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = _config["JwtSettings:Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+                var jwtToken = (JwtSecurityToken)validatedToken;
+
+                userId = int.Parse(jwtToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+                email = jwtToken.Claims.First(x => x.Type == ClaimTypes.Email).Value;
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }
