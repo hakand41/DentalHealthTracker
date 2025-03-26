@@ -20,7 +20,7 @@ namespace DentalHealthTracker.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] User user)
+        public async Task<IActionResult> Register([FromBody] User user, [FromServices] MailService mailService)
         {
             if (await _userService.GetByEmailAsync(user.Email) != null)
                 return BadRequest("Bu e-posta adresi zaten kayıtlı.");
@@ -30,8 +30,27 @@ namespace DentalHealthTracker.API.Controllers
             user.PasswordSalt = Convert.ToBase64String(passwordSalt);
 
             await _userService.AddAsync(user);
-            return Ok("Kullanıcı başarıyla oluşturuldu.");
+
+            // Kullanıcıya HTML formatında hoş geldin maili gönder
+            string emailSubject = "Hoş Geldiniz - Dental Health Tracker";
+            string emailBody = $@"
+                <html>
+                    <body>
+                        <h2>Merhaba {user.FullName},</h2>
+                        <p>Dental Health Tracker'a kayıt olduğunuz için teşekkür ederiz!</p>
+                        <p>Sağlıklı bir ağız bakımı için uygulamamızı kullanabilirsiniz.</p>
+                        <p><strong>Email:</strong> {user.Email}</p>
+                        <p><a href='https://dentalhealthtracker.com'>Giriş Yap</a></p>
+                        <br>
+                        <p>Dental Health Tracker Ekibi</p>
+                    </body>
+                </html>";
+
+            await mailService.SendEmailAsync(user.Email, emailSubject, emailBody);
+
+            return Ok("Kullanıcı başarıyla oluşturuldu. Aktivasyon e-postası gönderildi.");
         }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] User loginRequest)

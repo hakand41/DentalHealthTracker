@@ -42,6 +42,8 @@ builder.Services.AddScoped<IGoalService, GoalService>();
 builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
 builder.Services.AddScoped<INoteService, NoteService>();
 builder.Services.AddScoped<IHealthSuggestionService, HealthSuggestionService>();
+builder.Services.AddSingleton<MailService>();
+
 
 // **Veritabanı Bağlantısı**
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
