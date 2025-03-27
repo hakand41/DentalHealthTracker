@@ -29,5 +29,10 @@ namespace DentalHealthTracker.Infrastructure.Repositories
             return await _context.HealthRecords.AnyAsync(hr => hr.GoalId == goalId);
         }
         
+        public async Task UpdateGoalAsync(Goal goal)
+        {
+            _context.Goals.Update(goal);
+            await _context.SaveChangesAsync();  // Veritabanına değişiklikleri kaydet
+        }
     }
 }

@@ -27,6 +27,26 @@ namespace DentalHealthTracker.Infrastructure.Services
             return await _goalRepository.HasHealthRecordsAsync(goalId);
         }
 
+        public async Task<Goal?> UpdateGoalAsync(int id, Goal updatedGoal)
+        {
+            var existingGoal = await _goalRepository.GetByIdAsync(id);
+            if (existingGoal == null)
+            {
+                return null;
+            }
+
+            // Güncellenebilir alanlar
+            existingGoal.Title = updatedGoal.Title;
+            existingGoal.Description = updatedGoal.Description;
+            existingGoal.Period = updatedGoal.Period;
+            existingGoal.Importance = updatedGoal.Importance;
+            existingGoal.IsActive = updatedGoal.IsActive;
+            existingGoal.UpdatedAt = DateTime.UtcNow;
+
+            await _goalRepository.UpdateGoalAsync(existingGoal);  // Doğru metodu çağır
+            return existingGoal;
+        }
+
 
     }
 }

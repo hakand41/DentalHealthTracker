@@ -7,5 +7,6 @@ namespace DentalHealthTracker.Infrastructure.Repositories
         Task<IEnumerable<Goal>> GetUserGoalsAsync(int userId);
         Task<List<Goal>> GetGoalsByUser(int userId);
         Task<bool> HasHealthRecordsAsync(int goalId);
+        Task UpdateGoalAsync(Goal goal);
     }
 }

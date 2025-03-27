@@ -39,5 +39,22 @@ namespace DentalHealthTracker.API.Controllers
             var goals = await _goalService.GetUserGoalsAsync(userId);
             return Ok(goals);
         }
+
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateGoal(int id, [FromBody] Goal updatedGoal)
+        {
+            if (updatedGoal == null)
+            {
+                return BadRequest("Invalid goal data.");
+            }
+
+            var result = await _goalService.UpdateGoalAsync(id, updatedGoal);
+            if (result == null)
+            {
+                return NotFound("Goal not found.");
+            }
+
+            return Ok(result);
+        }
     }
 }
