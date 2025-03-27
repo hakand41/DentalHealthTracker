@@ -67,14 +67,15 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy  =>
-                      {
-                          policy.WithOrigins("http://localhost:5288", "http://localhost:3000") // Flutter Web ise 3000
-                                .AllowAnyMethod()
-                                .AllowAnyHeader()
-                                .AllowCredentials();
-                      });
+        policy =>
+        {
+            policy.SetIsOriginAllowed(origin => true) // Her kaynağa (origin) izin ver
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
 });
+
 
 var app = builder.Build();
 
