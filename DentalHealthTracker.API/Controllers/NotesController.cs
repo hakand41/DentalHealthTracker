@@ -39,5 +39,16 @@ namespace DentalHealthTracker.API.Controllers
             var notes = await _noteService.GetUserNotesAsync(userId);
             return Ok(notes);
         }
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteNote(int id)
+        {
+            var result = await _noteService.DeleteNoteAsync(id);
+            if (!result)
+            {
+                return NotFound("Silinmek istenen not bulunamadı.");
+            }
+            return Ok("Not başarıyla silindi.");
+        }
     }
 }

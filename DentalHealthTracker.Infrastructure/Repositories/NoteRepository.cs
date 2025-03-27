@@ -23,5 +23,15 @@ namespace DentalHealthTracker.Infrastructure.Repositories
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
         }
+
+        public async Task<bool> DeleteNoteAsync(int noteId)
+        {
+            var note = await _context.Notes.FindAsync(noteId);
+            if (note == null) return false;
+
+            _context.Notes.Remove(note);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
