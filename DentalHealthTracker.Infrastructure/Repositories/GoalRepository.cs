@@ -34,5 +34,20 @@ namespace DentalHealthTracker.Infrastructure.Repositories
             _context.Goals.Update(goal);
             await _context.SaveChangesAsync();  // Veritabanına değişiklikleri kaydet
         }
+
+        public async Task<bool> DeleteGoalAsync(int goalId)
+        {
+            var goal = await _context.Goals.FindAsync(goalId);
+            if (goal == null) return false;
+
+            if (await HasHealthRecordsAsync(goalId))
+            {
+                throw new InvalidOperationException("Bu hedefin ilişkili sağlık kayıtları olduğu için silinemez.");
+            }
+
+            _context.Goals.Remove(goal);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -8,5 +8,6 @@ namespace DentalHealthTracker.Infrastructure.Services
         Task<List<Goal>> GetGoalsByUser(int userId);
         Task<bool> HasHealthRecordsAsync(int goalId);
         Task<Goal?> UpdateGoalAsync(int id, Goal updatedGoal);
+        Task<bool> DeleteGoalAsync(int goalId);
     }
 }

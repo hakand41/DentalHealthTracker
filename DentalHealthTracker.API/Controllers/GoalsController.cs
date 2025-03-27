@@ -56,5 +56,23 @@ namespace DentalHealthTracker.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteGoal(int id)
+        {
+            try
+            {
+                var result = await _goalService.DeleteGoalAsync(id);
+                if (!result)
+                {
+                    return NotFound("Silinmek istenen hedef bulunamadı.");
+                }
+                return Ok("Hedef başarıyla silindi.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -47,6 +47,9 @@ namespace DentalHealthTracker.Infrastructure.Services
             return existingGoal;
         }
 
-
+        public async Task<bool> DeleteGoalAsync(int goalId)
+        {
+            return await _goalRepository.DeleteGoalAsync(goalId);
+        }
     }
 }
