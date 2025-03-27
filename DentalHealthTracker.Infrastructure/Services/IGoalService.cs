@@ -1,4 +1,3 @@
-using DentalHealthTracker.Core.DTOs;
 using DentalHealthTracker.Core.Entities;
 
 namespace DentalHealthTracker.Infrastructure.Services
