@@ -26,5 +26,17 @@ namespace DentalHealthTracker.Infrastructure.Services
         {
             return await _noteRepository.DeleteNoteAsync(noteId);
         }
+
+        public async Task<Note?> UpdateNoteAsync(int id, Note updatedNote)
+        {
+            var existingNote = await _noteRepository.GetByIdAsync(id);
+            if (existingNote == null) return null;
+
+            existingNote.Description = updatedNote.Description;
+            existingNote.ImagePath = updatedNote.ImagePath;
+            existingNote.CreatedAt = updatedNote.CreatedAt;  // Tarih güncellenmek istenirse
+            await _noteRepository.UpdateAsync(existingNote);  // Generic Repository kullanarak
+            return existingNote;
+        }
     }
 }

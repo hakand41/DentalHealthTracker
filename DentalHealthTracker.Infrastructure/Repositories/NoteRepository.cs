@@ -33,5 +33,11 @@ namespace DentalHealthTracker.Infrastructure.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task UpdateNoteAsync(Note note)
+        {
+            _context.Notes.Update(note);
+            await _context.SaveChangesAsync();  // Eksik olabilir!
+        }
     }
 }

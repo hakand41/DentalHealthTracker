@@ -7,5 +7,6 @@ namespace DentalHealthTracker.Infrastructure.Repositories
         Task<IEnumerable<Note>> GetUserNotesAsync(int userId);
         Task<List<Note>> GetNotesByUserAndDate(int userId, DateTime fromDate);
         Task<bool> DeleteNoteAsync(int noteId);
+        Task UpdateNoteAsync(Note note);
     }
 }

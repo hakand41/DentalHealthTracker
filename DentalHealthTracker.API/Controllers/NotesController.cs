@@ -50,5 +50,22 @@ namespace DentalHealthTracker.API.Controllers
             }
             return Ok("Not başarıyla silindi.");
         }
+
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateNote(int id, [FromBody] Note updatedNote)
+        {
+            if (updatedNote == null)
+            {
+                return BadRequest("Geçersiz not verisi.");
+            }
+
+            var result = await _noteService.UpdateNoteAsync(id, updatedNote);
+            if (result == null)
+            {
+                return NotFound("Not bulunamadı.");
+            }
+
+            return Ok(result);
+        }
     }
 }

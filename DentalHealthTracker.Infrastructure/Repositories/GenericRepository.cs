@@ -24,10 +24,10 @@ namespace DentalHealthTracker.Infrastructure.Repositories
 
         public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
 
-        public Task UpdateAsync(T entity)
+        public async Task UpdateAsync(T entity)
         {
-            _dbSet.Update(entity);
-            return Task.CompletedTask;
+            _context.Set<T>().Update(entity);
+            await _context.SaveChangesAsync();  // Kaydetmeyi unutmayalım
         }
 
         public Task DeleteAsync(T entity)
