@@ -1,0 +1,609 @@
+using DentalHealthTracker.Core.DTOs;
+using DentalHealthTracker.Core.Entities;
+using DentalHealthTracker.Infrastructure.Helpers;
+using DentalHealthTracker.Infrastructure.Services;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Authorization;   
+
+
+namespace DentalHealthTracker.API.Controllers
+{
+    [Route("api/auth")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        private readonly IUserService _userService;
+        private readonly JwtTokenGenerator _jwtTokenGenerator;
+        private readonly MailService _mailService;
+        private static ConcurrentDictionary<string, DateTime> _blacklistedTokens = new();
+
+        public AuthController(IUserService userService, JwtTokenGenerator jwtTokenGenerator, MailService mailService)
+        {
+            _userService = userService;
+            _jwtTokenGenerator = jwtTokenGenerator;
+            _mailService = mailService;
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] User user, [FromServices] MailService mailService)
+        {
+            if (await _userService.GetByEmailAsync(user.Email) != null)
+                return BadRequest("Bu e-posta adresi zaten kayıtlı.");
+
+            PasswordHasher.CreatePasswordHash(user.PasswordHash, out byte[] passwordHash, out byte[] passwordSalt);
+            user.PasswordHash = Convert.ToBase64String(passwordHash);
+            user.PasswordSalt = Convert.ToBase64String(passwordSalt);
+
+            await _userService.AddAsync(user);
+
+            // Kullanıcıya HTML formatında hoş geldin maili gönder
+            string emailSubject = "Hoş Geldiniz - Dental Health Tracker";
+            string emailBody = $@"
+                <html>
+                    <body>
+                        <h2>Merhaba {user.FullName},</h2>
+                        <p>Dental Health Tracker'a kayıt olduğunuz için teşekkür ederiz!</p>
+                        <p>Sağlıklı bir ağız bakımı için uygulamamızı kullanabilirsiniz.</p>
+                        <p><strong>Email:</strong> {user.Email}</p>
+                        <p><a href='http://localhost:5288'>Giriş Yap</a></p>
+                        <br>
+                        <p>Dental Health Tracker Ekibi</p>
+                    </body>
+                </html>";
+
+            await mailService.SendEmailAsync(user.Email, emailSubject, emailBody);
+
+            return Ok("Kullanıcı başarıyla oluşturuldu. Aktivasyon e-postası gönderildi.");
+        }
+
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] User loginRequest)
+        {
+            var user = await _userService.GetByEmailAsync(loginRequest.Email);
+            if (user == null) return Unauthorized("E-posta veya parola yanlış.");
+
+            bool isPasswordValid = PasswordHasher.VerifyPassword(
+                loginRequest.PasswordHash, 
+                Convert.FromBase64String(user.PasswordHash), 
+                Convert.FromBase64String(user.PasswordSalt)
+            );
+
+            if (!isPasswordValid) return Unauthorized("E-posta veya parola yanlış.");
+
+            string token = _jwtTokenGenerator.GenerateToken(user.Id, user.Email);
+            return Ok(new { token });
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var user = await _userService.GetByEmailAsync(request.Email);
+            if (user == null) return NotFound("Bu e-posta adresine sahip bir kullanıcı bulunamadı.");
+
+            // **Şifre sıfırlama için geçici token oluşturuyoruz**
+            string resetToken = _jwtTokenGenerator.GenerateToken(user.Id, user.Email);
+
+            // **Kullanıcıya şifre sıfırlama maili gönderiyoruz**
+            string emailSubject = "Parola Sıfırlama Talebi";
+            string emailBody = $@"
+                <html>
+                    <body>
+                        <h2>Merhaba {user.FullName},</h2>
+                        <p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
+                        <p>
+                            <a href='http://localhost:5288/reset-password?token={resetToken}'>
+                                Şifreyi Sıfırla
+                            </a>
+                        </p>
+                        <br>
+                        <p>Bu bağlantı yalnızca 30 dakika boyunca geçerlidir.</p>
+                        <p>Dental Health Tracker Ekibi</p>
+                    </body>
+                </html>";
+
+            await _mailService.SendEmailAsync(user.Email, emailSubject, emailBody);
+
+            return Ok("Parola sıfırlama talimatları e-posta adresinize gönderildi.");
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var user = await _userService.GetByEmailAsync(request.Email);
+            if (user == null) return NotFound("Bu e-posta adresine sahip bir kullanıcı bulunamadı.");
+
+            // **Token doğrulama (JWT içinde userId ve email var)**
+            bool isTokenValid = _jwtTokenGenerator.ValidateToken(request.Token, out int userId, out string email);
+            if (!isTokenValid || userId != user.Id) return Unauthorized("Geçersiz veya süresi dolmuş token.");
+
+            // **Yeni şifreyi hash'liyoruz**
+            PasswordHasher.CreatePasswordHash(request.NewPassword, out byte[] passwordHash, out byte[] passwordSalt);
+            user.PasswordHash = Convert.ToBase64String(passwordHash);
+            user.PasswordSalt = Convert.ToBase64String(passwordSalt);
+
+            await _userService.UpdateAsync(user);
+            return Ok("Şifreniz başarıyla güncellendi.");
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _blacklistedTokens.TryAdd(token, DateTime.UtcNow.AddHours(1)); // Token'ı 1 saat geçersiz yap
+            }
+            return Ok("Çıkış işlemi başarılı.");
+        }
+
+        public static bool IsTokenBlacklisted(string token)
+        {
+            return _blacklistedTokens.ContainsKey(token);
+        }
+    }
+}
+
+using DentalHealthTracker.Core.Entities;
+using DentalHealthTracker.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace DentalHealthTracker.API.Controllers
+{
+    [Route("api/goals")]
+    [ApiController]
+    [Authorize]  // Giriş yapmış kullanıcılar erişebilir
+    public class GoalsController : ControllerBase
+    {
+        private readonly IGoalService _goalService;
+
+        public GoalsController(IGoalService goalService)
+        {
+            _goalService = goalService;
+        }
+
+        [HttpPost("add")]
+        public async Task<IActionResult> AddGoal([FromBody] Goal goal)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            goal.UserId = int.Parse(userIdClaim);
+            var newGoal = await _goalService.AddAsync(goal);
+            return Ok(newGoal);
+        }
+
+        [HttpGet("my-goals")]
+        public async Task<IActionResult> GetMyGoals()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+            var goals = await _goalService.GetUserGoalsAsync(userId);
+            return Ok(goals);
+        }
+
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateGoal(int id, [FromBody] Goal updatedGoal)
+        {
+            if (updatedGoal == null)
+            {
+                return BadRequest("Invalid goal data.");
+            }
+
+            var result = await _goalService.UpdateGoalAsync(id, updatedGoal);
+            if (result == null)
+            {
+                return NotFound("Goal not found.");
+            }
+
+            return Ok(result);
+        }
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteGoal(int id)
+        {
+            try
+            {
+                var result = await _goalService.DeleteGoalAsync(id);
+                if (!result)
+                {
+                    return NotFound("Silinmek istenen hedef bulunamadı.");
+                }
+                return Ok("Hedef başarıyla silindi.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+    }
+}
+
+using DentalHealthTracker.Core.Entities;
+using DentalHealthTracker.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace DentalHealthTracker.API.Controllers
+{
+    [Route("api/healthrecords")]
+    [ApiController]
+    [Authorize]  // Sadece giriş yapmış kullanıcılar erişebilir
+    public class HealthRecordsController : ControllerBase
+    {
+        private readonly IHealthRecordService _healthRecordService;
+
+        public HealthRecordsController(IHealthRecordService healthRecordService)
+        {
+            _healthRecordService = healthRecordService;
+        }
+
+        [HttpPost("add")]
+        public async Task<IActionResult> AddHealthRecord([FromBody] HealthRecord healthRecord)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            healthRecord.UserId = int.Parse(userIdClaim);
+            var newRecord = await _healthRecordService.AddAsync(healthRecord);
+            return Ok(newRecord);
+        }
+
+        [HttpGet("my-records")]
+        public async Task<IActionResult> GetMyHealthRecords()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+            var records = await _healthRecordService.GetUserHealthRecordsAsync(userId);
+            return Ok(records);
+        }
+    }
+}
+
+using DentalHealthTracker.Core.Entities;
+using DentalHealthTracker.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace DentalHealthTracker.API.Controllers
+{
+    [Route("api/health-suggestions")]
+    [ApiController]
+    public class HealthSuggestionsController : ControllerBase
+    {
+        private readonly IHealthSuggestionService _healthSuggestionService;
+
+        public HealthSuggestionsController(IHealthSuggestionService healthSuggestionService)
+        {
+            _healthSuggestionService = healthSuggestionService;
+        }
+
+        [Authorize]
+        [HttpPost("add")]
+        public async Task<IActionResult> AddSuggestion([FromBody] HealthSuggestion suggestion)
+        {
+            var newSuggestion = await _healthSuggestionService.AddAsync(suggestion);
+            return Ok(newSuggestion);
+        }
+
+        [Authorize]
+        [HttpGet("random")]
+        public async Task<IActionResult> GetRandomSuggestion()
+        {
+            var suggestion = await _healthSuggestionService.GetRandomSuggestionAsync();
+            if (suggestion == null) return NotFound("Aktif öneri bulunamadı.");
+            return Ok(suggestion);
+        }
+    }
+}
+
+using DentalHealthTracker.Core.Entities;
+using DentalHealthTracker.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace DentalHealthTracker.API.Controllers
+{
+    [Route("api/home")]
+    [ApiController]
+    [Authorize]
+    public class HomeController : ControllerBase
+    {
+        private readonly IHealthRecordService _healthRecordService;
+        private readonly IHealthSuggestionService _healthSuggestionService;
+
+        public HomeController(IHealthRecordService healthRecordService, IHealthSuggestionService healthSuggestionService)
+        {
+            _healthRecordService = healthRecordService;
+            _healthSuggestionService = healthSuggestionService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetHomeData()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+
+            // Son 7 günlük sağlık kayıtlarını getir
+            var recentHealthRecords = await _healthRecordService.GetLast7DaysRecords(userId);
+
+            // Rastgele bir sağlık önerisi getir
+            var randomSuggestion = await _healthSuggestionService.GetRandomSuggestionAsync();
+
+            return Ok(new
+            {
+                recentHealthRecords,
+                randomSuggestion
+            });
+        }
+    }
+}
+
+using DentalHealthTracker.Core.Entities;
+using DentalHealthTracker.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace DentalHealthTracker.API.Controllers
+{
+    [Route("api/notes")]
+    [ApiController]
+    [Authorize]  // Sadece giriş yapmış kullanıcılar erişebilir
+    public class NotesController : ControllerBase
+    {
+        private readonly INoteService _noteService;
+
+        public NotesController(INoteService noteService)
+        {
+            _noteService = noteService;
+        }
+
+        [HttpPost("add")]
+        public async Task<IActionResult> AddNote([FromBody] Note note)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            note.UserId = int.Parse(userIdClaim);
+            var newNote = await _noteService.AddAsync(note);
+            return Ok(newNote);
+        }
+
+        [HttpGet("my-notes")]
+        public async Task<IActionResult> GetMyNotes()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+            var notes = await _noteService.GetUserNotesAsync(userId);
+            return Ok(notes);
+        }
+
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteNote(int id)
+        {
+            var result = await _noteService.DeleteNoteAsync(id);
+            if (!result)
+            {
+                return NotFound("Silinmek istenen not bulunamadı.");
+            }
+            return Ok("Not başarıyla silindi.");
+        }
+
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateNote(int id, [FromBody] Note updatedNote)
+        {
+            if (updatedNote == null)
+            {
+                return BadRequest("Geçersiz not verisi.");
+            }
+
+            var result = await _noteService.UpdateNoteAsync(id, updatedNote);
+            if (result == null)
+            {
+                return NotFound("Not bulunamadı.");
+            }
+
+            return Ok(result);
+        }
+    }
+}
+
+using DentalHealthTracker.Core.Entities;
+using DentalHealthTracker.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace DentalHealthTracker.API.Controllers
+{
+    [Route("api/oral-health")]
+    [ApiController]
+    [Authorize]
+    public class OralHealthController : ControllerBase
+    {
+        private readonly IHealthRecordService _healthRecordService;
+        private readonly INoteService _noteService;
+        private readonly IGoalService _goalService;
+
+        public OralHealthController(
+            IHealthRecordService healthRecordService,
+            INoteService noteService,
+            IGoalService goalService)
+        {
+            _healthRecordService = healthRecordService;
+            _noteService = noteService;
+            _goalService = goalService;
+        }
+
+        // ✅ 1️⃣ Kullanıcının Son 7 Günlük Sağlık Kayıtları + Notlarını Getir
+        [HttpGet("status")]
+        public async Task<IActionResult> GetOralHealthStatus()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+
+            var healthRecords = await _healthRecordService.GetLast7DaysRecords(userId);
+            var notes = await _noteService.GetNotesByUserAndDate(userId, sevenDaysAgo);
+
+            return Ok(new
+            {
+                healthRecords,
+                notes
+            });
+        }
+
+        // ✅ 2️⃣ Kullanıcının Hedeflerini Getir
+        [HttpGet("goals")]
+        public async Task<IActionResult> GetUserGoals()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+            var goals = await _goalService.GetGoalsByUser(userId);
+
+            return Ok(goals);
+        }
+
+        // ✅ 3️⃣ Kullanıcı Hedef Ekleyebilir
+        [HttpPost("goals")]
+        public async Task<IActionResult> AddGoal([FromBody] Goal goal)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            goal.UserId = int.Parse(userIdClaim);
+            goal.CreatedAt = DateTime.UtcNow;
+            goal.UpdatedAt = DateTime.UtcNow;
+
+            await _goalService.AddAsync(goal);
+            return Ok(goal);
+        }
+
+        // ✅ 4️⃣ Kullanıcı Hedef Silebilir
+        [HttpDelete("goals/{goalId}")]
+        public async Task<IActionResult> DeleteGoal(int goalId, [FromQuery] bool forceDelete = false)
+        {
+            var existingGoal = await _goalService.GetByIdAsync(goalId);
+            if (existingGoal == null)
+            {
+                return NotFound("Hedef bulunamadı.");
+            }
+
+            // Hedefe bağlı sağlık kayıtları olup olmadığını kontrol et
+            bool hasHealthRecords = await _healthRecordService.HasHealthRecordsAsync(goalId);
+
+            if (hasHealthRecords && !forceDelete)
+            {
+                return BadRequest("Bu hedef için sağlık kayıtları bulundu, silmek istediğinize emin misiniz?");
+            }
+
+            if (hasHealthRecords && forceDelete)
+            {
+                // Önce sağlık kayıtlarını sil
+                await _healthRecordService.DeleteByGoalIdAsync(goalId);
+            }
+
+            // Hedefi sil
+            await _goalService.DeleteAsync(existingGoal);
+            return Ok("Hedef başarıyla silindi.");
+        }
+
+
+
+
+    }
+}
+
+using DentalHealthTracker.Core.DTOs;
+using DentalHealthTracker.Core.Entities;
+using DentalHealthTracker.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace DentalHealthTracker.API.Controllers
+{
+    [Route("api/users")]
+    [ApiController]
+    public class UserController : ControllerBase
+    {
+        private readonly IUserService _userService;
+
+        public UserController(IUserService userService)
+        {
+            _userService = userService;
+        }
+
+        [Authorize] // Kullanıcının giriş yapmış olması gerekir
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz veya süresi dolmuş.");
+
+            int userId = int.Parse(userIdClaim);
+            var user = await _userService.GetByIdAsync(userId);
+            if (user == null) return NotFound("Kullanıcı bulunamadı.");
+
+            return Ok(new
+            {
+                user.Id,
+                user.Email,
+                user.FullName,
+                user.BirthDate
+            });
+        }
+
+        [Authorize]
+        [HttpPut("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] User updatedUser)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+            var user = await _userService.UpdateUserAsync(userId, updatedUser.FullName, updatedUser.BirthDate);
+            if (user == null) return BadRequest("Güncelleme başarısız.");
+
+            return Ok(user);
+        }
+
+        [Authorize]
+        [HttpPut("update-password")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest model)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized("Token geçersiz.");
+
+            int userId = int.Parse(userIdClaim);
+            var user = await _userService.UpdateUserPasswordAsync(userId, model.OldPassword, model.NewPassword);
+            if (user == null) return BadRequest("Şifre güncelleme başarısız.");
+
+            return Ok("Şifre başarıyla değiştirildi.");
+        }
+
+    }
+}
+
+Endpointler(controllers) bu şekilde bunları baz alarak bir angular projesi hazırlayalım. Adım adım proje yapısını belirleyerek ilerleyelim

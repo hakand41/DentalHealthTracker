@@ -89,13 +89,15 @@ namespace DentalHealthTracker.API.Controllers
 
             // **Kullanıcıya şifre sıfırlama maili gönderiyoruz**
             string emailSubject = "Parola Sıfırlama Talebi";
+            // Deep link URL'sini oluşturuyoruz. Burada "dht" uygulamanızın belirlediğiniz custom scheme'i.
+            string deepLink = $"dht://reset-password?token={resetToken}";
             string emailBody = $@"
                 <html>
                     <body>
                         <h2>Merhaba {user.FullName},</h2>
                         <p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
                         <p>
-                            <a href='http://localhost:5288/reset-password?token={resetToken}'>
+                            <a href='{deepLink}'>
                                 Şifreyi Sıfırla
                             </a>
                         </p>
@@ -104,6 +106,7 @@ namespace DentalHealthTracker.API.Controllers
                         <p>Dental Health Tracker Ekibi</p>
                     </body>
                 </html>";
+
 
             await _mailService.SendEmailAsync(user.Email, emailSubject, emailBody);
 
