@@ -9,5 +9,6 @@ namespace DentalHealthTracker.Infrastructure.Repositories
         Task<bool> HasHealthRecordsAsync(int goalId);
         Task UpdateGoalAsync(Goal goal);
         Task<bool> DeleteGoalAsync(int goalId);
+        Task<bool> DeleteGoalAsync(int goalId, bool forceDelete = false);
     }
 }

@@ -49,5 +49,32 @@ namespace DentalHealthTracker.Infrastructure.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+         // Yeni overload:
+        public async Task<bool> DeleteGoalAsync(int goalId, bool forceDelete = false)
+        {
+            // Goal + ilişkili HealthRecord’ları bir arada yükle
+            var goal = await _context.Goals
+                .Include(g => g.HealthRecords)
+                .FirstOrDefaultAsync(g => g.Id == goalId);
+
+            if (goal == null)
+                return false;
+
+            if (goal.HealthRecords.Any())
+            {
+                if (!forceDelete)
+                    throw new InvalidOperationException(
+                      "Bu hedefe ait sağlık kayıtları var. Zorla silmek için tekrar deneyin.");
+
+                // Önce child kayıtları sil
+                _context.HealthRecords.RemoveRange(goal.HealthRecords);
+            }
+
+            // Ardından goal’ü sil
+            _context.Goals.Remove(goal);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
